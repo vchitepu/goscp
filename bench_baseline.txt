@@ -1,0 +1,13 @@
+goos: linux
+goarch: amd64
+pkg: github.com/vchitepu/goscp/pkg/transfer
+cpu: AMD Ryzen 7 6800H with Radeon Graphics         
+BenchmarkScheduler_SingleWorker-8   	       2	5924663809 ns/op	 181.23 MB/s	    4168 B/op	      48 allocs/op
+BenchmarkScheduler_4Workers-8       	       7	1481313152 ns/op	 724.86 MB/s	    4868 B/op	      54 allocs/op
+BenchmarkScheduler_8Workers-8       	      15	 740680487 ns/op	1449.67 MB/s	    6469 B/op	      65 allocs/op
+BenchmarkScheduler_16Workers-8      	      15	 740942651 ns/op	1449.16 MB/s	    9022 B/op	      83 allocs/op
+BenchmarkScheduler_SmallFiles-8     	       3	3762541888 ns/op	 278.69 MB/s	   50298 B/op	     426 allocs/op
+BenchmarkScheduler_LargeChunks-8    	       4	2661436417 ns/op	 403.44 MB/s	    1644 B/op	      24 allocs/op
+BenchmarkScheduler_SmallChunks-8    	       7	1444406371 ns/op	 743.38 MB/s	   31220 B/op	     289 allocs/op
+PASS
+ok  	github.com/vchitepu/goscp/pkg/transfer	126.249s
