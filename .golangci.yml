@@ -1,3 +1,5 @@
+version: "2"
+
 run:
   timeout: 5m
 
@@ -8,9 +10,8 @@ linters:
     - govet
     - staticcheck
     - unused
-
-linters-settings:
-  gosec:
-    includes:
-      - G402
-      - G501
+  settings:
+    gosec:
+      includes:
+        - G402
+        - G501

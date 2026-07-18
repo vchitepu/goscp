@@ -79,7 +79,9 @@ func (s *localFileSFTP) ReadAt(path string, p []byte, off int64) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 	return f.ReadAt(p, off)
 }
 
@@ -88,7 +90,9 @@ func (s *localFileSFTP) WriteAt(path string, p []byte, off int64) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 	return f.WriteAt(p, off)
 }
 

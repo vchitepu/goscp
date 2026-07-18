@@ -103,7 +103,9 @@ func newRootCommand(logger *logrus.Logger) (*cobra.Command, error) {
 				}()
 			}
 			if opts.ShowVersion {
-				fmt.Fprintln(cmd.OutOrStdout(), version)
+				if _, err := fmt.Fprintln(cmd.OutOrStdout(), version); err != nil {
+					return &exitError{Code: 2, Err: errors.Wrap(err, "write version")}
+				}
 				return nil
 			}
 

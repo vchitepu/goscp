@@ -49,13 +49,17 @@ func (w *R2RTransferWorker) Execute(ctx context.Context, chunk Chunk, spec FileT
 	if err != nil {
 		return errors.Wrapf(err, "open source %s", spec.SrcPath)
 	}
-	defer srcReader.Close()
+	defer func() {
+		_ = srcReader.Close()
+	}()
 
 	dstWriter, err := w.dst.Create(spec.DstPath)
 	if err != nil {
 		return errors.Wrapf(err, "create destination %s", spec.DstPath)
 	}
-	defer dstWriter.Close()
+	defer func() {
+		_ = dstWriter.Close()
+	}()
 
 	if err := seekSourceToChunk(srcReader, chunk.Offset); err != nil {
 		return errors.Wrapf(err, "seek source to offset %d", chunk.Offset)

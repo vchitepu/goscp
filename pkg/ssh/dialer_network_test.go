@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -41,7 +42,9 @@ func TestDefaultDirectDial_Success(t *testing.T) {
 	client, err := d.defaultDirectDial(context.Background(), serverAddr, cfg)
 	require.NoError(t, err)
 	require.NotNil(t, client)
-	defer client.Close()
+	defer func() {
+		require.NoError(t, client.Close())
+	}()
 
 	sess, err := client.NewSession()
 	require.NoError(t, err)
@@ -53,7 +56,9 @@ func TestDefaultDirectDial_HandshakeFailure(t *testing.T) {
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
-	defer ln.Close()
+	defer func() {
+		require.NoError(t, ln.Close())
+	}()
 
 	go func() {
 		conn, err := ln.Accept()
@@ -89,12 +94,16 @@ func TestDefaultProxyDial_Success(t *testing.T) {
 
 	jumpClient, err := d.defaultDirectDial(context.Background(), jumpAddr, cfg)
 	require.NoError(t, err)
-	defer jumpClient.Close()
+	defer func() {
+		require.NoError(t, jumpClient.Close())
+	}()
 
 	proxied, err := d.defaultProxyDial(context.Background(), jumpClient, targetAddr, cfg)
 	require.NoError(t, err)
 	require.NotNil(t, proxied)
-	defer proxied.Close()
+	defer func() {
+		require.NoError(t, proxied.Close())
+	}()
 
 	sess, err := proxied.NewSession()
 	require.NoError(t, err)
@@ -126,7 +135,12 @@ func TestBuildSSHAgentAuth_Branches(t *testing.T) {
 func startAgentSocket(t *testing.T, withKey bool) (string, func()) {
 	t.Helper()
 
-	sock := filepath.Join(t.TempDir(), "agent.sock")
+	f, err := os.CreateTemp("/tmp", "goscp-agent-*.sock")
+	require.NoError(t, err)
+	sock := f.Name()
+	require.NoError(t, f.Close())
+	require.NoError(t, os.Remove(sock))
+
 	ln, err := net.Listen("unix", sock)
 	require.NoError(t, err)
 
@@ -146,7 +160,9 @@ func startAgentSocket(t *testing.T, withKey bool) (string, func()) {
 				return
 			}
 			go func(c net.Conn) {
-				defer c.Close()
+				defer func() {
+					_ = c.Close()
+				}()
 				_ = agent.ServeAgent(keyring, c)
 			}(conn)
 		}
@@ -154,6 +170,7 @@ func startAgentSocket(t *testing.T, withKey bool) (string, func()) {
 
 	return sock, func() {
 		_ = ln.Close()
+		_ = os.Remove(sock)
 		<-done
 	}
 }
